@@ -1,0 +1,65 @@
+<!-- index.html (Model_DB project) -->
+{% extends "base.html" %}
+{% block title %}
+    我有話要說
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <form name='my form' action='/' method='GET'>
+            現在的心情：<br/>
+            {% for m in moods %}
+                <input type='radio' name='mood' value='{{ m.status }}'>{{ m.status }}
+            {% endfor %}<br/>
+            心情留言板：<br/>
+            <textarea name='user_post' class="form-control" rows=3 cols=70></textarea><br/>
+            <label for='user_id'>你的暱稱：</label>
+            <input id='user_id' type='text' class="form-control" name='user_id'>
+            <label for='user_pass'>張貼密碼：</label>
+            <input id='user_pass' type='password' class="form-control" name='user_pass'><br/>
+            <input type='submit' class="btn btn-primary" value='張貼'>
+            <input type='reset' class="btn btn-danger" value='清除重填'>
+            {% if message %}
+                <div class="alert alert=warning">
+                    {{ message }}
+                </div>
+            {% endif %}
+            <div class="row">
+                {% for p in posts %}
+                    <div class="col-sm-12 col-md-4">
+                        <div class="panel-primary">
+                            <div class="panel-heading">
+                                [{{ p.nickname }}] 覺得 {{ p.mood }}
+                            </div>
+                            <div class="panel-body">
+                                {{ p.message | linebreaks }}
+                            </div>
+                            <span class="panel-footer" align="right">
+                                <i>
+                                    <small>
+                                        {{ p.pub_time }}
+                                    </small>
+                                    <span class="glyphicon glyphicon-trash" onclick="go_delete({{ p.id }})" ></span>
+                                </i>
+                            </span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </form>
+    </div>
+    <script>
+        function go_delete(id){
+            var user_pass = document.getElementById('user_pass').value;
+            if(user_pass !== ""){
+                var usr;
+                usr = '/' + id + '/' + user_pass;
+                window.location = usr;
+            }
+            else {
+                alert("請輸入刪除密碼")
+            }
+        }
+    </script>
+{% endblock %}
+
+
