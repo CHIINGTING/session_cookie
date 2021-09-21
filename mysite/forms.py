@@ -34,3 +34,8 @@ class ContactForm(forms.Form):
     user_school = forms.BooleanField(label='是否在學', required=False)
     user_email = forms.EmailField(label='電子郵件')
     user_message = forms.CharField(label='您的意見', widget=forms.Textarea)
+
+
+class loginForm(forms.Form):
+    username = forms.CharField(label='姓名', max_length=10)
+    password = forms.CharField(label='密碼', widget=forms.PasswordInput())

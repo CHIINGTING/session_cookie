@@ -22,10 +22,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index),
     path('get_example/', views.get_example),
-    path('<int:pid>/<str:del_pass>', views.index),
-    path('list/', views.listing),
-    path('post/', views.posting),
-    path('contact/', views.contact),
-    path('post2db/', views.post2db),
     path('captcha/', include('captcha.urls')),
+    path('login/', views.login),
+    path('logout/', views.logout),
+    path('userinfo/', views.userInfo),
 ]

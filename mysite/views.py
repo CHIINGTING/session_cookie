@@ -2,6 +2,9 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from mysite import models
 from mysite import forms
+from django.shortcuts import redirect
+from django.contrib.sessions.models import Session
+from django.contrib import messages
 
 
 def contact(request):
@@ -40,34 +43,9 @@ def get_example(request):
 
 
 def index(request, pid=None, del_pass=None):
-    posts = models.Post.objects.filter(enabled=False).order_by('-pub_time')[:30]
-    moods = models.Mood.objects.all()
-    try:
-        user_id = request.GET['user_id']
-        user_pass = request.GET['user_pass']
-        user_post = request.GET['user_post']
-        user_mood = request.GET['mood']
-    except:
-        user_id = None
-        message = '張貼每一則訊息,每個欄位都要填'
-    if user_id is not None:
-        mood = models.Mood.objects.get(status=user_mood)
-        post = models.Post.objects.create(mood=mood, nickname=user_id, del_pass=user_pass, message=user_post)
-        post.save()
-        message = '儲存成功!記得編輯你的密碼[{}],之後才會顯示'.format(user_pass)
-        posts = models.Post.objects.filter(enabled=True).order_by('-pub_time')[:150]
-
-    if del_pass and pid:
-        try:
-            post = models.Post.objects.get(id=pid)
-        except:
-            post = None
-        if post.del_pass == del_pass:
-            post.delete()
-            message = "資料刪除成功"
-        else:
-            message = "密碼錯誤"
-
+    if 'username' in request.session:
+        username = request.session['username']
+        usermail = request.session['useremail']
     return render(request, 'index.html', locals())
 
 
@@ -109,3 +87,46 @@ def post2db(request):
         post_form = forms.PostForm()
         message = '如要張貼訊息，則每一個欄位都要填... '
     return render(request, 'post2db.html', locals())
+
+
+def login(request):
+    if request.method == 'POST':
+        login_form = forms.loginForm(request.POST)
+        if login_form.is_valid():
+            login_name = request.POST['username'].strip()
+            login_password = request.POST['password']
+            try:
+                user = models.User.objects.get(name=login_name)
+                if user.password == login_password:
+                    request.session['username'] = user.name
+                    request.session['useremail'] = user.email
+                    messages.add_message(request, messages.SUCCESS, '登入成功')
+                    return redirect('/')
+                else:
+                    messages.add_message(request, messages.WARNING, '密碼錯誤請再檢查一次')
+            except:
+                messages.add_message(request, messages.WARNING, "找不到使用者")
+        else:
+            messages.add_message(request, messages.INFO, '請輸入必填欄位')
+    else:
+        login_form = forms.loginForm()
+    return render(request, 'login.html', locals())
+
+
+def logout(request):
+    if 'username' in request.session:
+        Session.objects.all().delete()
+        return redirect("/login/")
+    return redirect("/")
+
+
+def userInfo(request):
+    if 'username' in request.session:
+        username = request.session['username']
+    else:
+        return redirect("/login/")
+    try:
+        userinfo = models.User.objects.get(name=username)
+    except:
+        message = "找不到使用者"
+    return render(request, 'userInfo.html', locals())
