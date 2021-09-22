@@ -21,9 +21,9 @@ from django.conf.urls import include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index),
-    path('get_example/', views.get_example),
-    path('captcha/', include('captcha.urls')),
     path('login/', views.login),
     path('logout/', views.logout),
     path('userinfo/', views.userInfo),
+    path('post/', views.posting),
+    path('list/', views.listing),
 ]
